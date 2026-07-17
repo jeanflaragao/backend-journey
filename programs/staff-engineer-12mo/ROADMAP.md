@@ -68,7 +68,7 @@ Modules 3–12  ░░░░░░░░░░░░░░░  0/200  ⬜
 
 ### Week 1 — Timeouts, Retries & Idempotency
 
-- [ ] Day 21 — Timeouts and Retries 🔄
+- [x] Day 21 — Timeouts and Retries
 - [ ] Day 22 — Retries with Exponential Backoff and Jitter
 - [ ] Day 23 — Idempotency Keys & Safe Retries
 - [ ] Day 24 — Circuit Breakers

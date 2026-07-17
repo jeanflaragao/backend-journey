@@ -1,6 +1,6 @@
 # Day 21 — Timeouts and Retries
 
-**Module:** 2 — Reliability Engineering · **Week:** 1 · **Status:** 🔄 In progress
+**Module:** 2 — Reliability Engineering · **Week:** 1 · **Status:** ✅ Complete
 
 ---
 
@@ -52,14 +52,24 @@ const PAYMENT_TIMEOUT_MS = Math.round(p99 * 1.5); // derived, not guessed
 
 ## ✅ Success Criteria
 
-- [ ] p50, p99, and max latency extracted — PromQL used shown
-- [ ] Values cross-checked against Jaeger traces (not Prometheus alone)
-- [ ] Timeout value proposed = `p99 × 1.5`, with reasoning documented
-- [ ] No hardcoded timeout committed before the measurement step
-- [ ] Can explain the cascade-failure chain unprompted
+- [x] p50, p99, and max latency extracted — PromQL used shown
+- [x] Values cross-checked against Jaeger traces (not Prometheus alone)
+- [x] Timeout value proposed = `p99 × 1.5`, with reasoning documented
+- [x] No hardcoded timeout committed before the measurement step
+- [x] Can explain the cascade-failure chain unprompted
 
 ---
 
 ## 📝 Review
 
-_To be filled in after the exercise: what was learned, what was hard, self-score 1–5, and any item for spaced repetition._
+**What happened:** `payment-service` had zero Prometheus instrumentation going in — no histogram, no `/metrics` route, and `prometheus.yml` only scraped the legacy monolith on `:3000`. Built the histogram (`payment_service_duration_seconds`, labeled by `status`), wired `observe()` into both the success and `502` exit paths, added the `/metrics` route, and added a `payment-service` scrape job pointing at `:3003`.
+
+First PromQL pass gave p50 = 2.33s, p99 = 4.92s. Cross-checking against Jaeger showed the **true max was only 3.03s** — meaning Prometheus's own p99 estimate was higher than the actual maximum observed value, a logical impossibility. Root cause: the histogram's original buckets (`...3, 5`) had a 2-second gap sitting exactly where the real "slow" cluster lived (~3.0–3.05s, from `setTimeout` drift under load), so `histogram_quantile()`'s linear interpolation across that gap produced a badly inflated estimate. Fixed by adding finer buckets (`3, 3.1, 3.2, 3.5`) around the real cluster and re-measuring — p99 came back at 3.08s, consistent with Jaeger.
+
+**Final numbers:** p50 = 2.33s · p99 = 3.08s (post-fix) · max = 3.03s (Jaeger) → **timeout = 4620ms** (`p99 × 1.5`).
+
+**What was hardest:** environment setup — `docker-compose` (hyphenated) wasn't installed, had to use `docker compose` (v2 plugin); and the repo has two separate compose files (`docker-compose.yml` = Jaeger only, `docker-compose.monitoring.yml` = Prometheus/Grafana), which caused real confusion about why "starting the stack" didn't bring Prometheus up.
+
+**Self-score:** 3/5
+
+**Spaced repetition candidate:** histogram bucket boundaries determine quantile accuracy — coarse buckets near where real data clusters cause `histogram_quantile()` to silently produce misleading tail estimates via linear interpolation; always cross-check a Prometheus-derived p99/p999 against raw trace data before trusting it, especially soon after adding new instrumentation with unverified bucket choices.

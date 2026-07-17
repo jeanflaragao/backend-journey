@@ -11,9 +11,9 @@
 |---|---|
 | **Program** | Staff Engineer (12-month) |
 | **Module** | 2 — Reliability Engineering |
-| **Week / Day** | Week 1 · Day 21 — Timeouts and Retries |
+| **Week / Day** | Week 1 · Day 22 — Retries with Exponential Backoff and Jitter |
 | **Project** | TicketFlow 🟢 Active |
-| **Last updated** | 2026-07-15 |
+| **Last updated** | 2026-07-16 |
 
 ---
 
@@ -23,7 +23,7 @@
 
 **Module 2** — Reliability Engineering 🔄 in progress
 - `HighPurchaseFailureRate` alert patched: failure-ratio expression, sample-size guard, `for: 5m`
-- Day 21 exercise **in progress**: extract p50/p99/max latency for `payment-service` from Prometheus and Jaeger **before** configuring any timeout
+- Day 21 ✅ complete (self-score 3/5): instrumented `payment-service` with a Prometheus histogram (it had none before), measured p50/p99/max, caught a bad p99 estimate via Jaeger cross-check (coarse bucket boundaries were interpolating a misleading tail value), fixed bucket resolution, proposed timeout = 4620ms (`p99 × 1.5`)
 
 → Narrative log: [`PROGRESS.md`](programs/staff-engineer-12mo/PROGRESS.md)
 → Full checklist: [`ROADMAP.md`](programs/staff-engineer-12mo/ROADMAP.md)
@@ -32,7 +32,7 @@
 
 ## ⏭️ Immediate Next Step
 
-Continue **Day 21**: run the PromQL queries against Prometheus to extract p50, p99, and max observed latency for `payment-service`. Cross-check 3–5 traces in Jaeger. The timeout value (`p99 × 1.5`) comes **after** the measurement — not before.
+Start **Day 22 — Retries with Exponential Backoff and Jitter**. Required reading first: [Timeouts, retries, and backoff with jitter](https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/) (Marc Brooker, AWS Builder's Library). Then implement a retry wrapper for `purchase-service → payment-service` using the `4620ms` timeout from Day 21, with exponential backoff + jitter — not naive fixed-delay retries.
 
 ---
 
@@ -42,6 +42,7 @@ Continue **Day 21**: run the PromQL queries against Prometheus to extract p50, p
 |---|---|---|
 | Tail-based sampling: decision point is the **OTel Collector**, not the API gateway | Recurring gap — flagged Module 1 | Day 40 |
 | Idempotency | Being addressed — Day 23 | In progress |
+| Histogram bucket resolution determines quantile accuracy — cross-check fresh Prometheus quantiles against raw trace data | Flagged Day 21 | Day 27 |
 
 ---
 

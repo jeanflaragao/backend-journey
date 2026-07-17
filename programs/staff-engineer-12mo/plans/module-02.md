@@ -45,7 +45,7 @@
 
 **Theme:** "Measure first. A timeout without data is a guess."
 
-### Day 21 — Timeouts and Retries 🔄
+### Day 21 — Timeouts and Retries ✅
 
 **Session breakdown:**
 - Theory (10 min): why an unmeasured timeout is a production incident waiting to happen
@@ -71,10 +71,10 @@ const PAYMENT_TIMEOUT_MS = Math.round(p99 * 1.5); // derived, not guessed
 ```
 
 **Success criteria:**
-- [ ] Query results shown before any code change
-- [ ] Timeout value = `p99 × 1.5`, not a round-number guess
-- [ ] No hardcoded timeout committed before the measurement step
-- [ ] Can explain the cascade-failure chain unprompted
+- [x] Query results shown before any code change
+- [x] Timeout value = `p99 × 1.5`, not a round-number guess
+- [x] No hardcoded timeout committed before the measurement step
+- [x] Can explain the cascade-failure chain unprompted
 
 ---
 
@@ -486,4 +486,4 @@ Query optimization, indexes, connection pooling, caching, migrations. The reliab
 
 ---
 
-*Last updated: 2026-07-15 · Current progress: Day 21 in progress*
+*Last updated: 2026-07-16 · Current progress: Day 21 complete, Day 22 next*
